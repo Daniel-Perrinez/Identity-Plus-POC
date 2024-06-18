@@ -49,7 +49,7 @@ resource "aws_security_group" "identity_plus_sg" {
 
 # Define a security group that allows incoming traffic on port 443 from anywhere (`0.0.0.0/0`).
 resource "aws_security_group" "mTLS_sg" {
-  name        = "example-sg"
+  name        = "Identity Plus mTLS sg"
   description = "Security group for example VPC"
   vpc_id     = aws_vpc.identity-plus-vpc.id
 
