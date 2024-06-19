@@ -45,6 +45,20 @@ resource "aws_security_group" "identity_plus_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    Name        = "Identity Plus Security Group"
+    Project     = "Identity-Plus-POC"
+    Environment = "dev"
+  }
 }
 
 # Define a security group that allows incoming traffic on port 443 from anywhere (`0.0.0.0/0`).
@@ -53,11 +67,25 @@ resource "aws_security_group" "mTLS_sg" {
   description = "Security group for example VPC"
   vpc_id     = aws_vpc.identity-plus-vpc.id
 
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name        = "Identity Plus mTLS Security Group"
+    Project     = "Identity-Plus-POC"
+    Environment = "dev"
   }
 }
 
