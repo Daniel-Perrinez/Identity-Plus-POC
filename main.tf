@@ -115,10 +115,11 @@ resource "aws_internet_gateway" "identity_plus_igw" {
   }
 }
 
-resource "aws_internet_gateway_attachment" "identity_plus_igw_attachment" {
-  internet_gateway_id = aws_internet_gateway.identity_plus_igw.id
-  vpc_id              = aws_vpc.identity-plus-vpc.id
-}
+# │ Error: creating EC2 Internet Gateway Attachment: attaching EC2 Internet Gateway (igw-0fa5169e08f5461db) to VPC (vpc-0abf426453b84fc69): Resource.AlreadyAssociated: resource igw-0fa5169e08f5461db is already attached to network vpc-0abf426453b84fc69
+# resource "aws_internet_gateway_attachment" "identity_plus_igw_attachment" {
+#   internet_gateway_id = aws_internet_gateway.identity_plus_igw.id
+#   vpc_id              = aws_vpc.identity-plus-vpc.id
+# }
 
 # ----------------------------------------------------------------------------------------------------------------
 
