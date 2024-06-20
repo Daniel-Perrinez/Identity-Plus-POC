@@ -1,0 +1,71 @@
+services: 
+    https://platform.identity.plus/organization/danielwei/service/247410061488702180/access-management/services
+    https://identityplus.mtlsgateway.danielwei.mtls.app
+    MinIO: https://minio-admin.mtlsgateway.danielwei.mtls.app/browser/test/intro-k8s.txt
+
+    service-confs: https://github.com/IdentityPlus/instant-mtls/tree/master/conf/http
+    cli-tool: https://github.com/IdentityPlus/cli
+
+
+    client-setup: https://github.com/IdentityPlus/instant-mtls/blob/master/Instant%20mTLS%20Demo/client.sh
+    minio-setup: https://github.com/IdentityPlus/instant-mtls/blob/master/Instant%20mTLS%20Demo/minio-service.sh
+    mtls-setup: https://github.com/IdentityPlus/instant-mtls/blob/master/Instant%20mTLS%20Demo/mtls-gateway.sh
+
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+
+
+
+docker build --build-arg="token=nU0TRPHU7koIOINnk6fSa9NpOWLdsSXw" -t instant-mtls-idp .
+docker run -d -p 80:80 -p 443:443 --name mtls-gateway instant-mtls-idp
+
+
+
+
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+
+
+apt-get update
+apt-get upgrade -y
+apt-get install -y dnsutils mc ufw htop ca-certificates docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+
+
+docker run -d \
+   -p 10.0.1.238:9000:9000 \
+   -p 10.0.1.238:9001:9001 \
+   --name "minio-service" \
+   -v /media/data:/data \
+   -e "MINIO_ROOT_USER=minioadmin" \
+   -e "MINIO_ROOT_PASSWORD=minioadmin" \
+   quay.io/minio/minio server /data --console-address ":9001"
+
+
+
+
+
+curl https://platform.identity.plus/download/trust-chain?format=pem --cert /Applications/identityplus/test/default.cer --key /Applications/identityplus/test/default.key > /Applications/identityplus/test/identity-plus-root.cer
+
+curl https://minio-external.mtlsgateway.danielwei.mtls.app/test/intro-k8s.txt --cert /Applications/identityplus/test/default.cer --key /Applications/identityplus/test/default.key --cacert /Applications/identityplus/test/identity-plus-root.cer
+
+
+
+
+
+
+
+
+curl https://platform.identity.plus/download/trust-chain?format=pem --cert /etc/internal-client/default.cer --key /etc/internal-client/default.key > /etc/internal-client/identity-plus-root.cer
+
+curl https://minio-internal.mtlsgateway.danielwei.mtls.app/test/intro-k8s.txt --cert /etc/internal-client/default.cer --key /etc/internal-client/default.key --cacert /etc/internal-client/identity-plus-root.cer
+
+
+
+
+
+./identityplus -f /Applications/identityplus/test -d superadmin enroll XHOFvsEHko4cmi7i76EeJWf8PgUC5tyX
