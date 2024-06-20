@@ -27,60 +27,126 @@ resource "aws_subnet" "identity-plus-lan-subnet" {
 
 # Create a security group to restrict incoming traffic to SSH and HTTP
 resource "aws_security_group" "identity_plus_sg" {
-  name        = "identity-plus-sg"
-  description = "Security group for Identity Plus VPC"
-  vpc_id     = aws_vpc.identity-plus-vpc.id
+    name        = "identity-plus-sg"
+    description = "Security group for Identity Plus VPC"
+    vpc_id     = aws_vpc.identity-plus-vpc.id
 
-  #allow incoming traffic on SSH (port 22) and HTTP (port 80), from anywhere (`0.0.0.0/0`).
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+    egress = [
+    {
+        cidr_blocks      = [
+            "0.0.0.0/0",
+        ]
+        description      = "All traffic out IPv4"
+        from_port        = 0
+        ipv6_cidr_blocks = []
+        prefix_list_ids  = []
+        protocol         = "-1"
+        security_groups  = []
+        self             = false
+        to_port          = 0
+    },
+    {
+        cidr_blocks      = []
+        description      = "All traffic out IPv6"
+        from_port        = 0
+        ipv6_cidr_blocks = [
+            "::/0",
+        ]
+        prefix_list_ids  = []
+        protocol         = "-1"
+        security_groups  = []
+        self             = false
+        to_port          = 0
+    },
+    ]
 
-  egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
+    ingress = [
+    {
+        cidr_blocks      = [
+            "0.0.0.0/0",
+        ]
+        description      = "All traffic in IPv4"
+        from_port        = 0
+        ipv6_cidr_blocks = []
+        prefix_list_ids  = []
+        protocol         = "-1"
+        security_groups  = []
+        self             = false
+        to_port          = 0
+    },
+    {
+        cidr_blocks      = [
+            "0.0.0.0/0",
+        ]
+        description      = "ssh in"
+        from_port        = 22
+        ipv6_cidr_blocks = []
+        prefix_list_ids  = []
+        protocol         = "tcp"
+        security_groups  = []
+        self             = false
+        to_port          = 22
+    },
+    ]
 
-  tags = {
-    Name        = "Identity Plus Security Group"
-    Project     = "Identity-Plus-POC"
-    Environment = "dev"
-  }
-}
+    tags = {
+        Name        = "Identity Plus Security Group"
+        Project     = "Identity-Plus-POC"
+        Environment = "dev"
+    }
+    }
 
 # Define a security group that allows incoming traffic on port 443 from anywhere (`0.0.0.0/0`).
 resource "aws_security_group" "mTLS_sg" {
-  name        = "Identity Plus mTLS sg"
-  description = "Security group for example VPC"
-  vpc_id     = aws_vpc.identity-plus-vpc.id
+    name        = "Identity Plus mTLS sg"
+    description = "Security group for example VPC"
+    vpc_id     = aws_vpc.identity-plus-vpc.id
 
-  egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
+    egress = [
+    {
+        cidr_blocks      = [
+            "0.0.0.0/0",
+        ]
+        description      = "All traffic out IPv4"
+        from_port        = 0
+        ipv6_cidr_blocks = []
+        prefix_list_ids  = []
+        protocol         = "-1"
+        security_groups  = []
+        self             = false
+        to_port          = 0
+    },
+    {
+        cidr_blocks      = []
+        description      = "All traffic out IPv6"
+        from_port        = 0
+        ipv6_cidr_blocks = [
+            "::/0",
+        ]
+        prefix_list_ids  = []
+        protocol         = "-1"
+        security_groups  = []
+        self             = false
+        to_port          = 0
+    },
+    ]
 
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+    ingress = [
+    {
+        cidr_blocks      = [
+            "0.0.0.0/0",
+        ]
+        description      = "All traffic in IPv4"
+        from_port        = 0
+        ipv6_cidr_blocks = []
+        prefix_list_ids  = []
+        protocol         = "-1"
+        security_groups  = []
+        self             = false
+        to_port          = 0
+    },
+    ]
 
   tags = {
     Name        = "Identity Plus mTLS Security Group"
@@ -179,6 +245,8 @@ resource "aws_instance" "identity-plus-vms" {
   vpc_security_group_ids = [aws_security_group.identity_plus_sg.id]
   subnet_id     = aws_subnet.identity-plus-lan-subnet.id
   
+  associate_public_ip_address = true
+
   root_block_device {
     volume_size           = 30 # in GiB
     volume_type           = "gp2"
