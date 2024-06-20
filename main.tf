@@ -164,12 +164,19 @@ resource "aws_route_table" "identity_plus_rt" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.identity_plus_igw.id
   }
+
+  tags = {
+    Name        = "Identity Plus route table"
+    Project     = "Identity-Plus-POC"
+    Environment = "dev"
+  }
 }
 
-resource "aws_main_route_table_association" "identity_plus_association" {
-  vpc_id         = aws_vpc.identity-plus-vpc.id
-  route_table_id = aws_route_table.identity_plus_rt.id
-}
+# resource "aws_main_route_table_association" "identity_plus_association" {
+#   depends_on = [ aws_vpc.identity-plus-vpc,aws_route_table.identity_plus_rt ]
+#   vpc_id         = aws_vpc.identity-plus-vpc.id
+#   route_table_id = aws_route_table.identity_plus_rt.id
+# }
 
 resource "aws_internet_gateway" "identity_plus_igw" {
   vpc_id = aws_vpc.identity-plus-vpc.id
@@ -181,11 +188,11 @@ resource "aws_internet_gateway" "identity_plus_igw" {
   }
 }
 
-# │ Error: creating EC2 Internet Gateway Attachment: attaching EC2 Internet Gateway (igw-0fa5169e08f5461db) to VPC (vpc-0abf426453b84fc69): Resource.AlreadyAssociated: resource igw-0fa5169e08f5461db is already attached to network vpc-0abf426453b84fc69
-# resource "aws_internet_gateway_attachment" "identity_plus_igw_attachment" {
-#   internet_gateway_id = aws_internet_gateway.identity_plus_igw.id
-#   vpc_id              = aws_vpc.identity-plus-vpc.id
-# }
+                # │ Error: creating EC2 Internet Gateway Attachment: attaching EC2 Internet Gateway (igw-0fa5169e08f5461db) to VPC (vpc-0abf426453b84fc69): Resource.AlreadyAssociated: resource igw-0fa5169e08f5461db is already attached to network vpc-0abf426453b84fc69
+                # resource "aws_internet_gateway_attachment" "identity_plus_igw_attachment" {
+                #   internet_gateway_id = aws_internet_gateway.identity_plus_igw.id
+                #   vpc_id              = aws_vpc.identity-plus-vpc.id
+                # }
 
 # ----------------------------------------------------------------------------------------------------------------
 
@@ -205,13 +212,6 @@ data "aws_ami" "ubuntu_2404_x86_64" {
 
   owners = ["099720109477"] # Canonical
 }
-
-# Create an RSA PEM key pair localy with 'ssh-keygen -t rsa'
-# resource "aws_key_pair" "identity_plus-key" {
-#   key_name   = "identity_plus-key"
-#   key_type   = RSA
-#   #pw = abc123
-# }
 
 # Create three VMs running Ubuntu 24.04 LTS (x86_64), each with 1 GB of RAM and 30 GB of disk space
 resource "aws_instance" "identity-plus-mTLS_Gateway_VM" {
